@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "project": "发票助手-发票邮件筛选Skill",
+  "created": "2026-07-28",
+  "workflow": {
+    "research_phase": false,
+    "research_reason": "PRD v1.0 已含完整配置规范、业务规则、验收清单与样例，跳过领域研究",
+    "atomic_commits": true,
+    "commit_language": "zh-CN",
+    "uat_per_phase": true,
+    "auto_advance": false
+  },
+  "decisions": {
+    "git_init": true,
+    "milestone_scope": "v1.0 包含 PRD 全部 FR-1 ~ FR-10",
+    "scheduler": "脚本内调度器（常驻 Python 进程，config.yaml 热更新周期）"
+  },
+  "environment": {
+    "os": "Windows",
+    "shell": "PowerShell",
+    "python": "3.14.6",
+    "deps": {
+      "openpyxl": "3.1.5",
+      "PyYAML": "6.0.3"
+    }
+  },
+  "paths": {
+    "prd": "E:\\File\\XQDWorkFile\\财务开发票\\开发票-开发\\PRD\\PRD_发票邮件筛选Skill.md",
+    "output_dir": "E:\\File\\XQDWorkFile\\财务开发票\\开发票-开发\\test_发票邮件拦截校验报告"
+  }
+}

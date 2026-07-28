@@ -1,0 +1,25 @@
+# 敏感凭证（PRD 安全要求：不入 Git）
+config.yaml
+config.yml
+
+# 运行产物
+processed_emails.json
+*.log
+logs/
+
+# 报告输出（若指向工作区内则排除）
+*发票邮件报告.md
+*发票邮件报告.xlsx
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
