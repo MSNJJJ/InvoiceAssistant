@@ -1,0 +1,43 @@
+Content-Type: multipart/mixed; boundary="===============7904816728369381609=="
+MIME-Version: 1.0
+From: system@example.com
+To: finance@company.com
+Subject: =?utf-8?b?57O757uf6YCa55+l?=
+Date: Tue, 28 Jul 2026 00:00:00 +0800
+
+--===============7904816728369381609==
+Content-Type: multipart/related;
+ boundary="===============5034078987224595377=="
+MIME-Version: 1.0
+
+--===============5034078987224595377==
+Content-Type: multipart/alternative;
+ boundary="===============1714172282183755293=="
+MIME-Version: 1.0
+
+--===============1714172282183755293==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+
+5q2k6YKu5Lu25YyF5ZCrIEhUTUwg5YaF5a6577yM6K+35L2/55So5pSv5oyBIEhUTUwg55qE6YKu
+5Lu25a6i5oi356uv5p+l55yL44CC
+
+--===============1714172282183755293==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+
+CjxodG1sPgo8Ym9keT4KPHA+5ZCE5L2N5ZCM5LqL77yaPC9wPgo8cD7kuLrliqDlvLrlhazlj7jk
+v6Hmga/lronlhajvvIznjrDpgJrnn6XlpoLkuIvvvJo8L3A+CjxvbD4KICA8bGk+6K+35Yu/5bCG
+5YWs5Y+45YaF6YOo6LWE5paZ5aSW5LygPC9saT4KICA8bGk+5a6a5pyf5pu05paw57O757uf5a+G
+56CBPC9saT4KICA8bGk+5aaC5Y+R546w5byC5bi455m75b2V6K6w5b2V77yM6K+35Y+K5pe26IGU
+57O7SVTpg6jpl6g8L2xpPgo8L29sPgo8cD7mhJ/osKLphY3lkIjvvIE8L3A+CjxwIGFsaWduPSJy
+aWdodCI+5L+h5oGv5oqA5pyv6YOoPGJyLz4yMDI25bm0N+aciDI45pelPC9wPgo8L2JvZHk+Cjwv
+aHRtbD4K
+
+--===============1714172282183755293==--
+
+--===============5034078987224595377==--
+
+--===============7904816728369381609==--

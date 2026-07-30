@@ -23,3 +23,12 @@ venv/
 .idea/
 Thumbs.db
 .DS_Store
+
+# 测试临时文件
+.tmp_*
+
+# WorkBuddy 配置
+.workbuddy/
+
+# 测试输出目录
+outputs/

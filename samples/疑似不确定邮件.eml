@@ -1,0 +1,38 @@
+Content-Type: multipart/mixed; boundary="===============4625481581893461083=="
+MIME-Version: 1.0
+From: unknown@example.com
+To: finance@company.com
+Subject: =?utf-8?b?5peg5qCH6aKY6YKu5Lu2?=
+Date: Tue, 28 Jul 2026 00:00:00 +0800
+
+--===============4625481581893461083==
+Content-Type: multipart/related;
+ boundary="===============2325241708985073696=="
+MIME-Version: 1.0
+
+--===============2325241708985073696==
+Content-Type: multipart/alternative;
+ boundary="===============0886446975252565570=="
+MIME-Version: 1.0
+
+--===============0886446975252565570==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+
+5q2k6YKu5Lu25YyF5ZCrIEhUTUwg5YaF5a6577yM6K+35L2/55So5pSv5oyBIEhUTUwg55qE6YKu
+5Lu25a6i5oi356uv5p+l55yL44CC
+
+--===============0886446975252565570==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+
+CjxodG1sPgo8Ym9keT4KPHA+5L2g5aW9PC9wPgo8cD7purvng6bnnIvkuIDkuIvov5nkuKo8L3A+
+CjwvYm9keT4KPC9odG1sPgo=
+
+--===============0886446975252565570==--
+
+--===============2325241708985073696==--
+
+--===============4625481581893461083==--
