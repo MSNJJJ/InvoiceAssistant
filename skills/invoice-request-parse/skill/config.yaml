@@ -1,0 +1,43 @@
+# ============================================================
+# invoice-request-parse — 发票请求解析 skill 配置
+# 只负责读 handoff/pending 的 xlsx → openpyxl 直读 → 校验 → 去重 → 报告
+# 不连邮箱、不碰凭证
+# ============================================================
+
+# --- 关键词（表格识别）---
+keywords:
+  invoice_table: "开票申请"              # 选表关键字（优先匹配 sheet 名）
+  table_parser:
+    mode_priority: ["key_value", "column_index"]  # 优先尝试模式
+    field_mapping:                                # 键值对模式字段映射
+      amount: ["开票金额", "金额", "实付金额"]
+      order_id: ["订单号", "订单编号", "主订单ID"]
+      note: ["备注"]
+      title: ["发票抬头", "抬头", "购买方名称", "公司名称"]          # 发票抬头（供下游开票）；不用模糊别名"名称"，避免与「商品名称」列冲突选错列
+      tax_id: ["税号", "统一社会信用代码", "纳税人识别号", "购方识别号"]  # 税号（企业必填）
+    column_indices:                               # 列索引模式兜底（1-based）
+      amount: 8
+      order_id: 10
+      note: 14
+      title: 4                                    # 第4列「公司名称/姓名」= 发票抬头
+      tax_id: 5                                   # 第5列「公司税号」= 税号
+
+# --- 订单号 ---
+order_no:
+  valid_lengths: [12, 16]              # 合法订单号数字长度
+
+# --- 去重 ---
+dedup:
+  check_history: true                  # 与历史 processed_emails.json 做订单号去重
+
+# --- 解析失败重试（死信）---
+parse:
+  max_retry: 2                         # 侧车解析失败最多重试次数，超过则移入 handoff/failed/ 死信目录不再重试
+
+# --- 交接目录（与 invoice-mail-monitor 共享）---
+handoff:
+  dir: "E:/File/XQDWorkFile/财务开发票/开发票-业务/skill总汇/Interest-Island-Invoice-Automation-main/Interest-Island-Invoice-Automation_8.9testByGjc/skills/invoice_handoff"                            # ← 占位符, 部署时替换为实际路径, 如 C:/Users/xxx/WorkBuddy/invoice_handoff
+
+# --- 报告输出 ---
+output:
+  dir: "E:/File/XQDWorkFile/财务开发票/开发票-业务/skill总汇/Interest-Island-Invoice-Automation-main/Interest-Island-Invoice-Automation_8.9testByGjc/skills/invoice_handoff/reports"                     # ← 占位符, 生成 .md / .json 双报告

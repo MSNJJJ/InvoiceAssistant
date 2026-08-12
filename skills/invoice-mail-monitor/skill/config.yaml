@@ -1,0 +1,30 @@
+# ============================================================
+# invoice-mail-monitor — 发票邮件监控 skill 配置
+# 只负责连邮箱 / 拉未读 / 分类 / 取附件，不解析表格、不碰开票逻辑
+# ============================================================
+
+# --- 邮箱连接（IMAP）---
+email:
+  server: "imap.qiye.aliyun.com"      # 阿里云企业邮箱 IMAP 服务器
+  port: 993                            # SSL 端口
+  account: "jiachun.guo@qlchat.com"                          # ← 邮箱账号(占位符), 部署时替换为真实邮箱账号
+  auth_type: "password"                # password | authcode（授权码）
+  # 安全：真实账号/密码不要提交到仓库。本地使用请填真实值，或用环境变量占位符由运行环境注入。
+  # 下面为占位符，需替换为真实账号/密码/授权码后才能连邮箱。
+  password: "hrFp17uONpfrM4jM"            # ← 占位符：部署时替换为真实密码或授权码（日志自动脱敏）
+
+# --- 关键词（邮件识别）---
+keywords:
+  invoice_body: ["发票", "开票"]       # R1：正文关键词
+  invoice_table: "开票申请"              # R2：表格标题关键词
+  urgent: ["加急"]                      # 加急识别关键词
+
+# --- 交接目录（与 invoice-request-parse 共享）---
+# monitor 把发票邮件的 xlsx + 侧车 json 写到 <dir>/pending/
+# parse 从该目录读取并处理
+handoff:
+  dir: "E:/File/XQDWorkFile/财务开发票/开发票-业务/skill总汇/Interest-Island-Invoice-Automation-main/Interest-Island-Invoice-Automation_8.9testByGjc/skills/invoice_handoff"            # ← 占位符, 部署时替换为实际路径, 如 C:/Users/xxx/WorkBuddy/invoice_handoff
+
+# --- 定时调度（供 automation 参考，skill 本身不常驻）---
+schedule:
+  interval: "1h"

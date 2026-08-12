@@ -1,0 +1,176 @@
+{
+  "_meta": {
+    "based_on_real_screenshots": true,
+    "verified_at": "2026-07-29",
+    "source": "用户提供截图 + 兴趣岛 /finance/invoice 页面分析",
+    "note": "新建发票弹窗是 el-dialog portal 渲染，需要从 document.body 全局定位。本文件为定位策略参考，代码实际按 label 文本匹配字段（findInputInDialog），trigger_selector 中的 jQuery 伪选择器（:has/:contains）未被代码使用"
+  },
+  "login": {
+    "detection": {
+      "url_contains": "/login",
+      "page_title": "兴趣岛管理系统"
+    }
+  },
+  "main_menu": {
+    "items": {
+      "invoice_review": {
+        "text": "开票审核",
+        "href": "/finance/invoice",
+        "note": "在'财务管理'分类下（参考截图1左侧导航）"
+      }
+    },
+    "navigation_rule": "用 evaluate 查找 (text, href) 元组匹配，点击 a 元素"
+  },
+  "invoice_review_page": {
+    "url": "/finance/invoice",
+    "page_title": "开票审核",
+    "trigger_buttons": {
+      "new_invoice": {
+        "text": "新建",
+        "type": "button (primary 蓝色)",
+        "note": "点击后弹出'新建发票'对话框（图2）。不要点'批量开票'，那会弹出保密承诺函"
+      }
+    },
+    "table": {
+      "container": ".el-table__body",
+      "header_columns": [
+        "订单ID", "当前状态", "失败原因", "申请开票时间", "用户ID",
+        "用户昵称", "所属品类", "商品名称", "支付金额", "抬头类型",
+        "发票抬头", "退款金额", "操作"
+      ],
+      "note": "本 skill 不操作表格行数据，只触发'新建'进入弹窗"
+    }
+  },
+  "new_invoice_dialog": {
+    "dialog_title": "新建发票",
+    "selector_strategy": "dialog 是 el-dialog portal 渲染，需从 document.body 全局查找",
+    "container_selectors": [
+      ".el-dialog",
+      ".el-dialog__wrapper",
+      "[role='dialog']"
+    ],
+    "fields": {
+      "order_id": {
+        "label_text": "订单ID",
+        "required": true,
+        "selector": ".el-dialog input[placeholder*='订单id']",
+        "vue_approach": "直接定位 input，dispatch input + change 事件触发后端 API 自动填充",
+        "placeholder_text": "请输入订单id"
+      },
+      "category": {
+        "label_text": "所属品类",
+        "auto_filled": true,
+        "trigger_field": "order_id",
+        "readonly": true,
+        "selector": ".el-dialog input[placeholder*='所属品类']",
+        "note": "填订单ID 后由后端 API 自动填充"
+      },
+      "product_name": {
+        "label_text": "商品名称",
+        "auto_filled": true,
+        "trigger_field": "order_id",
+        "readonly": true,
+        "selector": ".el-dialog input[placeholder*='商品名称']",
+        "note": "填订单ID 后由后端 API 自动填充"
+      },
+      "user_id": {
+        "label_text": "用户ID",
+        "auto_filled": true,
+        "trigger_field": "order_id",
+        "readonly": true,
+        "selector": ".el-dialog input[placeholder*='用户ID']",
+        "note": "填订单ID 后由后端 API 自动填充"
+      },
+      "invoice_amount": {
+        "label_text": "开票金额",
+        "required": true,
+        "selector": ".el-dialog input[placeholder*='开票金额']",
+        "type": "number"
+      },
+      "invoice_type": {
+        "label_text": "发票类型",
+        "required": true,
+        "component": "el-select",
+        "allowed_values": ["电子普通发票", "增值税专用发票"],
+        "note": "图3 中只有这两项被红框框出，其他选项（红冲类）不允许",
+        "trigger_selector": ".el-dialog .el-select:has(span:contains('发票类型'))",
+        "dropdown_wait_ms": 1500
+      },
+      "title_type": {
+        "label_text": "抬头类型",
+        "required": true,
+        "component": "el-select",
+        "allowed_values": ["个人/非企业", "企业"],
+        "note": "图4 中只有这两个选项",
+        "trigger_selector": ".el-dialog .el-select:has(span:contains('抬头类型'))",
+        "dropdown_wait_ms": 1500
+      },
+      "invoice_title": {
+        "label_text": "发票抬头",
+        "required": true,
+        "selector": ".el-dialog input[placeholder*='发票抬头']",
+        "max_chars": 100,
+        "validation_required_when_title_type_company": true
+      },
+      "company_tax_id": {
+        "label_text": "企业税号",
+        "required_when": "title_type == 企业",
+        "selector": ".el-dialog input[placeholder*='企业税号']",
+        "max_chars": 100,
+        "note": "抬头类型=个人/非企业 时此字段可留空"
+      },
+      "invoice_pdf": {
+        "label_text": "发票PDF",
+        "required": true,
+        "component": "el-upload",
+        "trigger_text": "点击上传",
+        "file_input_selector": ".el-dialog input[type='file']",
+        "note": "隐藏的 file input。沙箱无法用 setInputFiles(path)（fs 被禁用），改用 base64 通路：调用方传 invoice_pdf_base64 → evaluate 内 atob 还原 → new File → DataTransfer → 驱动 el-upload.__vue__.handleChange"
+      },
+      "remarks": {
+        "label_text": "备注",
+        "required": false,
+        "selector": ".el-dialog textarea[placeholder*='备注']",
+        "max_chars": 400,
+        "note": "每次新建自动填入\"订单号：{真实订单号}\"；调用方传 remarks 时追加其后（用；分隔）。代码通过 setInputValueInDialog(page,'备注',value) 填写"
+      }
+    },
+    "buttons": {
+      "cancel": {
+        "text": "取消",
+        "type": "button (default 灰色)",
+        "selector": ".el-dialog .el-button:has-text('取消')"
+      },
+      "confirm": {
+        "text": "确定",
+        "type": "button (primary 蓝色)",
+        "selector": ".el-dialog .el-button--primary",
+        "safety_note": "⚠️ 仅在 confirm=true 时才点击"
+      }
+    }
+  },
+  "auto_fill_detection": {
+    "method": "轮询查询订单ID 输入后，category/product_name/user_id 三个 readonly 字段从空变非空",
+    "polling_interval_ms": 500,
+    "max_wait_ms": 8000,
+    "success_when": "三个字段全部非空",
+    "failure_when": "超时未填充"
+  },
+  "el_select_dropdown": {
+    "container_selector": ".el-select-dropdown",
+    "item_selector": ".el-select-dropdown__item",
+    "portal_to_body": true,
+    "selection_method": "先点击 .el-select 触发显示 → 等待 dropdown 出现 → 点击 item"
+  },
+  "el_upload": {
+    "trigger_text": "点击上传",
+    "file_input_in_dom": "input[type='file'] 通常被 display:none 隐藏",
+    "upload_method": "base64 通路：invoice_pdf_base64 → atob → new File → DataTransfer → el-upload.__vue__.handleChange（setInputFiles(path) 因沙箱 fs 禁用不可用）",
+    "size_limit_note": "PDF ≤ 2000KB，否则后端拒绝。沙箱无法读磁盘文件大小，由调用方提供 pdf_size_bytes 字段"
+  },
+  "session_expired": {
+    "detection": "当前 URL 包含 /login",
+    "response_status": "login_required",
+    "recovery_hint_to_user": "请扫码登录兴趣岛系统"
+  }
+}

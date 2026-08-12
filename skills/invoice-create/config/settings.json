@@ -1,0 +1,65 @@
+{
+  "name": "interest_island_invoice_create",
+  "version": "1.0.0",
+  "description": "兴趣岛发票新建 Skill：填写开票审核页的'新建发票'弹窗，默认不提交",
+  "interest_island": {
+    "base_url": "https://edu-admin.qlchat.com",
+    "invoice_review_url": "https://edu-admin.qlchat.com/finance/invoice",
+    "login_url_pattern": "/login"
+  },
+  "browser": {
+    "browser_instance": "interest-island",
+    "mode": "visible",
+    "login_persistence": true,
+    "idle_timeout": "0",
+    "note": "复用命名浏览器 interest-island，保持扫码登录态"
+  },
+  "timeouts": {
+    "page_navigation_ms": 30000,
+    "page_load_stable_wait_ms": 3000,
+    "dialog_open_ms": 5000,
+    "auto_fill_ms": 8000,
+    "select_dropdown_ms": 3000,
+    "pdf_upload_ms": 10000,
+    "post_action_wait_ms": 1500
+  },
+  "paths": {
+    "screenshot_dir": "screenshots",
+    "input_file": "~/.dev-browser/tmp/interest_island_invoice_create_input.json",
+    "output_file": "~/.dev-browser/tmp/interest_island_invoice_create_output.json"
+  },
+  "validation": {
+    "allowed_invoice_types": ["电子普通发票", "增值税专用发票"],
+    "allowed_title_types": ["个人/非企业", "企业"],
+    "invoice_title_max_chars": 100,
+    "company_tax_id_max_chars": 100,
+    "remarks_max_chars": 400
+  },
+  "pdf": {
+    "max_size_kb": 2000,
+    "max_size_bytes": 2048000,
+    "mime_type": "application/pdf",
+    "note": "上传前必须检查文件大小，>2000KB 拒绝"
+  },
+  "safety": {
+    "default_confirm": false,
+    "note": "默认 confirm=false，只填到弹窗可提交状态，不点确定键"
+  },
+  "debug": true,
+  "log_level": "info",
+  "screenshots": {
+    "after_dialog_open": true,
+    "after_fill_complete": true,
+    "after_pdf_uploaded": true,
+    "filename_pattern": "{task_id}_{order_id}_{result_status}_{timestamp}.png"
+  },
+  "fallback": {
+    "login_required_status": "login_required",
+    "invalid_input_status": "invalid_input",
+    "page_structure_change_status": "page_structure_change",
+    "auto_fill_timeout_status": "auto_fill_timeout",
+    "pdf_too_large_status": "invalid_input",
+    "dialog_open_failed_status": "dialog_open_failed",
+    "_note": "本块为状态映射说明，代码未读取此配置；值与 interest_island_invoice_create.js 实际写入的 query_status 对齐"
+  }
+}

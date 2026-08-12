@@ -1,0 +1,203 @@
+{
+  "_meta": {
+    "based_on_real_dom": true,
+    "verified_at": "2026-07-27",
+    "verified_on_order_id_9999000000000005": true,
+    "invoice_invoiced_order_verified": true,
+    "v2_update": "使用 Vue listQuery 直驱查询，替代不可靠的 DOM 操作",
+    "note": "基于实际访问兴趣岛管理系统探查所得。核心发现：日期字段必须 delete（不能设空字符串），否则 API 报'时间范围不可超过1个月'"
+  },
+  "api": {
+    "endpoint": "GET /admin/financialActCharge/list",
+    "params_example": "page=1&limit=20&type=financial&status=&orderId=9999000000000005&resourceCode=%2Forder%2Ffinancial",
+    "note": "不带 startTime/endTime 参数则无日期限制。status='' 表示不筛选订单状态"
+  },
+  "login": {
+    "detection": {
+      "url_contains": "/login",
+      "page_title": "兴趣岛管理系统",
+      "heading_text": "兴趣岛管理系统",
+      "body_text_indicators": ["手机号", "验证码", "登录"],
+      "phone_input_placeholder": "手机号",
+      "code_input_placeholder": "验证码",
+      "get_code_button_text": "获取验证码",
+      "agreement_checkbox_text": "我已阅读并同意",
+      "login_button_text": "登录",
+      "qr_icon_img_src_part": "/qr.png",
+      "qr_canvas_src_pattern": "login.work.weixin.qq.com/wwlogin/sso/qrcode"
+    },
+    "qr_login_when_used": {
+      "trigger": "user_prefers_scan_over_sms",
+      "selectors": {
+        "qr_icon_image": "img[src*='/qr.png']",
+        "qr_container_image": "img[src*='qrcode?key=']"
+      },
+      "obstacles": {
+        "div_fill_overlay": "登录页存在 div.fill 遮罩层，可能拦截直接点击。解决方法：用 page.evaluate 移除 .fill 元素再触发 img.click()"
+      }
+    }
+  },
+  "main_menu": {
+    "items": {
+      "formal_camp_orders": {
+        "text": "正式营订单",
+        "href": "/order/financial",
+        "role": "link"
+      },
+      "small_course_orders": {
+        "text": "轻课订单",
+        "href": "/order/smallCourseOrder"
+      },
+      "trial_camp_orders": {
+        "text": "体验营订单",
+        "href": "/order/intention"
+      },
+      "split_pay_orders": {
+        "text": "分笔支付订单",
+        "href": "/order/splitPay"
+      },
+      "offline_orders": {
+        "text": "线下订单",
+        "href": "/order/oldAliOrderRecord"
+      },
+      "external_orders": {
+        "text": "三方店铺订单",
+        "href": "/order/externalOrder"
+      }
+    },
+    "navigation_rule": "用 evaluate 查找 (text, href) 元组匹配，点击 a 元素",
+    "note": "每个菜单项同时存在 menuitem role 和 link role，应优先 link"
+  },
+  "formal_camp_page": {
+    "default_filters_visible": [
+      "所属品类", "日期(开始/结束)", "所属部门",
+      "支付方式", "订单类型"
+    ],
+    "expand_button": {
+      "text_collapsed": "展开",
+      "text_expanded": "收起"
+    },
+    "expanded_filters": [
+      "商品类型", "订单状态(默认=已支付)", "退款状态",
+      "售后中", "销售归属人", "主订单ID(请输入)",
+      "正式营名称", "横向复购", "业绩归属品类",
+      "是否内部员工", "支付开始/结束日期", "是否匹配线索",
+      "是否分成订单", "是否修改销售归属人", "是否外部班委订单",
+      "是否转介绍订单", "成单类型", "是否开发票",
+      "是否有售后接待", "是否追赠", "是否换营", "是否代付",
+      "手机号"
+    ],
+    "main_order_id_input": {
+      "located_by": "Vue component data: root.$children[2].$children[2].$children[0].listQuery.orderId",
+      "approach": "v2 不再使用 DOM 操作，直接修改 Vue 组件 listQuery 数据",
+      "note": "input 的实际 type 可能是 text（不是 number），且 selectType 下拉决定搜索字段"
+    },
+    "date_filter": {
+      "approach": "delete listQuery.startTime / listQuery.endTime（不能设空字符串！）",
+      "why": "设空字符串 API 仍传空值，设宽范围 API 报'不超过1个月'。只有 delete 键才不传时间参数"
+    },
+    "order_status_filter": {
+      "locator": "label text == '订单状态' → scope.querySelector('input[placeholder=\"请选择\"]')",
+      "default_value": "已支付",
+      "must_clear_before_query_for_non_paid": true,
+      "clear_strategy": "用原生 setter 清空 input.value，触发 input + change 事件"
+    },
+    "query_button": {
+      "text": "查询",
+      "type": "button (el-button--primary 蓝色)"
+    },
+    "reset_optional_note": "本 Skill 不会触发 reset；每次清空所有筛选条件再查询",
+    "results_table": {
+      "container": ".el-table__body",
+      "rows": "tbody tr",
+      "empty_text_selector": ".el-table__empty-text",
+      "empty_text_values": ["暂无数据", "没有数据", "暂无相关数据"],
+      "total_pattern_js": "document.body.innerText.match(/共\\s*(\\d+)\\s*条/)",
+      "pagination_text": "20条/页 + 页码"
+    },
+    "results_columns": [
+      "主订单ID", "所属品类", "正式营ID", "商品名称", "商品类型",
+      "是否追赠", "追赠状态", "用户id", "售后中", "用户昵称",
+      "手机号", "会员等级", "商品总价(元)", "优惠券金额(元)",
+      "会员折扣(元)", "应付金额(元)", "实付金额(元)", "内部员工",
+      "待补款(元)", "支付方式", "订单状态", "退款状态", "下单时间",
+      "支付时间", "是否外部班委订单", "销售归属人", "所属部门",
+      "订单类型", "成单类型", "是否横向复购", "业绩归属品类",
+      "是否开发票", "是否换营", "换营金额", "换营时间", "课程阶段",
+      "一级部门", "体验营销售归属人", "是否代付"
+    ],
+    "action_column_index": "last cell (倒数第一个 td)",
+    "action_buttons_text_order": [
+      "复制链接",
+      "详情",
+      "换营",
+      "追赠"
+    ],
+    "action_buttons_notes": {
+      "复制链接": "部分订单显示为 '复制开票链接'",
+      "详情": "本 Skill 唯一允许点击",
+      "换营": "禁止",
+      "追赠": "禁止"
+    },
+    "detail_button_locator": "lastCell.querySelectorAll('button') 中 text === '详情'",
+    "forbidden_actions": ["换营", "追赠", "复制链接", "复制开票链接"]
+  },
+  "detail_panel": {
+    "trigger": "在结果表格行内点击 '详情' 按钮",
+    "drawer_selectors": {
+      "primary": ".el-drawer",
+      "primary_class_observed": "el-drawer rtl notify-drawer",
+      "title_text": "订单详情",
+      "close_button": ".el-drawer__close-btn"
+    },
+    "drawer_content_locators": {
+      "best_practice": "使用 document.body.innerText 全文检索（drawer 是 portal 渲染，单独选 .el-drawer innerText 为空）",
+      "field_extraction_js": "正则 /([\\u4e00-\\u9fa5]+)\\s*[：:]\\s*([^\\n]+)/g 提取 key:value 对"
+    },
+    "sections": {
+      "order_info": {
+        "title_text": "订单信息",
+        "fields": [
+          "主订单ID", "下单时间", "支付方式", "订单状态",
+          "订单类型", "所属品类", "正式营ID", "商品名称",
+          "销售归属人", "所属部门", "分销人ID", "分销人名称",
+          "用户ID", "微信昵称", "手机号", "下单链接",
+          "是否代付", "是否换营"
+        ],
+        "key_field_for_business_logic": "订单状态"
+      },
+      "payment_info": {
+        "title_text": "付款信息",
+        "fields": [
+          "商品总价", "优惠券金额", "会员折扣", "应付金额", "已支付"
+        ],
+        "subtable": "主订单ID / 子订单ID / 下单时间 / 支付时间 / 支付金额 / 支付方式 / 分期期数 / 类型 / 订单状态"
+      },
+      "invoice_info": {
+        "title_text": "发票信息",
+        "present_only_if_invoiced": true,
+        "extraction_strategy": "从 document.body.innerText 中查找 '发票信息' 关键字",
+        "expected_subfields_if_present": [
+          "发票类型", "抬头类型", "发票抬头", "企业税号", "操作人", "操作时间", "发票链接"
+        ],
+        "abnormal_handling": "标题存在但内容加载失败/为空 → 转人工复核"
+      }
+    },
+    "verification_for_decision": {
+      "logic": "全文检索 → 解析字段 → 判断规则分支",
+      "rules": [
+        "若既无订单状态又无订单信息 → manual_review",
+        "若订单状态未读取到明确值 → manual_review",
+        "若订单状态 != '已支付' → order_not_paid",
+        "若订单状态 == '已支付' 且全文不含 '发票信息' → ready_to_invoice",
+        "若订单状态 == '已支付' 且 '发票信息' 出现且包含具体字段 → already_invoiced",
+        "若订单状态 == '已支付' 且 '发票信息' 标题存在但内容异常 → manual_review"
+      ]
+    }
+  },
+  "logout_or_session_expired": {
+    "detection": "当前 URL 包含 /login 或 page.title == '兴趣岛管理系统' 且 bodyText 包含 '手机号'",
+    "response_status": "login_required",
+    "recovery_hint_to_user": "请扫码登录兴趣岛系统"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "interest_island_invoice_checker",
+  "version": "0.3.0",
+  "description": "兴趣岛订单开票核验 Skill：只读查询订单状态与发票信息，判断能否进入开票流程",
+  "interest_island": {
+    "base_url": "https://edu-admin.qlchat.com",
+    "finance_invoice_url": "https://edu-admin.qlchat.com/finance/invoice",
+    "formal_camp_orders_url": "https://edu-admin.qlchat.com/order/financial",
+    "login_url_pattern": "/login",
+    "menu_paths": {
+      "formal_camp_orders": "/order/financial",
+      "small_course_orders": "/order/smallCourseOrder",
+      "trial_camp_orders": "/order/intention",
+      "split_pay_orders": "/order/splitPay",
+      "offline_orders": "/order/oldAliOrderRecord",
+      "external_orders": "/order/externalOrder",
+      "invoice_review": "/finance/invoice",
+      "refund_data": "/refund/refundData",
+      "refund_review": "/refund/refundReview"
+    }
+  },
+  "browser": {
+    "page_name": "interest-island",
+    "browser_instance": "interest-island",
+    "mode": "visible",
+    "login_persistence": true,
+    "idle_timeout": "0",
+    "note": "使用 --browser interest-island --idle-timeout 0 启动可见浏览器，复用命名页 interest-island 保持登录会话（与代码 getPage('interest-island') 一致）"
+  },
+  "timeouts": {
+    "page_navigation_ms": 30000,
+    "page_domcontentloaded_ms": 15000,
+    "page_load_stable_wait_ms": 3000,
+    "element_wait_ms": 10000,
+    "table_load_ms": 10000,
+    "detail_panel_ms": 10000,
+    "post_action_wait_ms": 2000,
+    "login_retry_wait_ms": 5000,
+    "drawer_close_wait_ms": 1500
+  },
+  "paths": {
+    "screenshot_dir": "screenshots",
+    "log_dir": "logs",
+    "input_file": "~/.dev-browser/tmp/interest_island_input.json",
+    "output_file": "~/.dev-browser/tmp/interest_island_output.json"
+  },
+  "debug": true,
+  "log_level": "info",
+  "input_validation": {
+    "order_id_min_length": 8,
+    "order_id_max_length": 24,
+    "order_id_pattern": "^[0-9]+$",
+    "note": "严格按字符串处理，避免长订单号被 type=number 转成科学计数法"
+  },
+  "screenshots": {
+    "after_query": true,
+    "after_detail_open": true,
+    "after_invoice_detection": true,
+    "on_error": true,
+    "filename_pattern": "{task_id}_{order_id}_{result_status}_{timestamp}.png"
+  },
+  "fallback": {
+    "login_required_status": "login_required",
+    "manual_review_status": "manual_review",
+    "page_structure_change_status": "manual_review",
+    "detail_panel_not_loaded_status": "manual_review",
+    "invoice_info_section_empty_to_manual_review": true
+  },
+  "known_issues": {
+    "main_order_id_input_is_type_number": "主订单ID 输入框是 input[type=number]，必须用原生 setter 设置 value 避免精度损失（已实现）",
+    "order_status_default_filter": "页面进入时订单状态默认为'已支付'，查询非已支付订单前需先清空该筛选（脚本会自动清除）",
+    "drawer_close_via_escape_unreliable": "抽屉关闭按钮需点击 .el-drawer__close-btn，按 Escape 不可靠",
+    "frozen_login_status_without_qr": "已登录的可见浏览器在重启 daemon 后可能复用扫码态，需注意"
+  }
+}

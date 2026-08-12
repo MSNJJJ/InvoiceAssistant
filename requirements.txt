@@ -1,0 +1,12 @@
+# Interest Island Invoice Automation - Python 依赖
+# 安装: pip install -r requirements.txt
+# Python 版本要求: >= 3.8
+
+# 配置解析（invoice-mail-monitor, invoice-request-parse）
+PyYAML>=6.0
+
+# Excel 读写（invoice-request-parse, wecom-invoice-import）
+openpyxl>=3.0.0
+
+# 测试（invoice-request-parse/tests/）
+pytest>=7.0.0

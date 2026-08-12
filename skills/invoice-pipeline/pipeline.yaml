@@ -1,0 +1,140 @@
+# ============================================================
+# invoice-pipeline — 开票全流程编排定义
+# ============================================================
+# 本文件声明式定义 4→5→[6人工]→7→8 的流水线步骤、输入输出契约、
+# 依赖关系和断点控制。可供大模型编排层和自动化调度器消费。
+# ============================================================
+
+pipeline:
+  name: interest-island-invoice-pipeline
+  version: "1.0.0"
+  description: >
+    兴趣岛开票全流程编排，按序串联 wecom-invoice-query →
+    order-invoice-checker → [税务局人工开票] → invoice-create →
+    wecom-invoice-import
+
+# ── 全局输入 ──
+input:
+  formats:
+    - type: json_report
+      description: 上游 invoice-request-parse 输出的结构化报告（首选）
+      pattern: "reports/*发票邮件报告.json"
+    - type: md_report
+      description: 上游报告的人视图版本（兜底）
+      pattern: "reports/*发票邮件报告.md"
+    - type: excel
+      description: 开票申请 Excel 表格
+    - type: paste_text
+      description: 粘贴的开票信息文本
+  required_fields:
+    - order_id    # 订单号
+    - title       # 抬头
+    - amount      # 金额
+    - tax_id      # 税号（企业必填）
+
+# ── 流水线步骤 ──
+steps:
+
+  # 步骤 4：查重
+  - id: dedup
+    skill: wecom-invoice-query
+    description: 企微文档查重，检查订单是否已开过票
+    tier: read_only_verification
+    browser: wecom
+    input:
+      order_num: "${prev.order_id}"
+    input_file: ~/.dev-browser/tmp/wecom_query_input.json
+    output_file: ~/.dev-browser/tmp/wecom_query_output.json
+    output_mapping:
+      found: already_invoiced  # true → 跳过
+    timeout_seconds: 90
+    parallelizable: true       # 可与步骤 5 并行（不同浏览器实例）
+
+  # 步骤 5：订单核验
+  - id: verify
+    skill: order-invoice-checker
+    description: 兴趣岛系统核验订单状态和发票信息
+    tier: read_only_verification
+    browser: interest-island
+    input:
+      order_id: "${prev.order_id}"
+    input_file: ~/.dev-browser/tmp/interest_island_input.json
+    output_file: ~/.dev-browser/tmp/interest_island_output.json
+    output_mapping:
+      result_status: status        # invoiced / not_invoiced / manual_review
+      can_invoice: can_proceed     # true → 继续步骤 6
+    timeout_seconds: 120
+    parallelizable: true
+
+  # 步骤 6：税务局开票（人工断点）
+  - id: tax_invoice
+    type: manual_breakpoint
+    description: >
+      渲染开票信息卡，暂停等待人工去税务局开票。
+      用户返回发票 PDF 后恢复执行。
+    input:
+      from_step: [dedup, verify]
+    action: render_invoice_card
+    wait_for:
+      - invoice_pdf  # 用户返回的 PDF 文件
+    resume_signal: "用户确认已开票完成并附上 PDF"
+
+  # 步骤 7：新建发票记录
+  - id: create_record
+    skill: invoice-create
+    description: 兴趣岛系统新建发票记录（含 PDF 上传）
+    tier: write_with_safety_guard
+    browser: interest-island
+    depends_on: [tax_invoice]
+    input:
+      order_id: "${dedup.order_id}"
+      invoice_amount: "${prev.amount}"
+      invoice_type: "${prev.invoice_type}"
+      title_type: "${prev.title_type}"
+      invoice_title: "${prev.title}"
+      company_tax_id: "${prev.tax_id}"
+      invoice_pdf_base64: "${tax_invoice.pdf_base64}"
+      confirm: false              # 安全门：默认不提交
+    input_file: ~/.dev-browser/tmp/interest_island_invoice_create_input.json
+    output_file: ~/.dev-browser/tmp/interest_island_invoice_create_output.json
+    output_mapping:
+      result_status: status       # filled_not_submitted / submitted
+    safety_gate:
+      field: confirm
+      default: false
+      confirm_required: true      # 需要用户显式确认后才改为 true
+    timeout_seconds: 120
+
+  # 步骤 8：归档
+  - id: archive
+    skill: wecom-invoice-import
+    description: 将开票记录录入企微文档归档
+    tier: write_with_safety_guard
+    browser: wecom
+    depends_on: [create_record]
+    input:
+      tsv: "${create_record.tsv_data}"
+      doc_url: "${config.wecom_doc_url}"
+    input_file: ~/.dev-browser/tmp/wecom_import_input.json
+    output_file: ~/.dev-browser/tmp/wecom_import_output.json
+    output_mapping:
+      status: archive_status      # success / dedup_blocked / ...
+    timeout_seconds: 240
+
+# ── 执行顺序 ──
+execution_order:
+  - phase: 0
+    steps: [parse_input]   # 解析上游输入，生成 to_process 列表
+  - phase: 1
+    steps: [dedup, verify]  # 可并行执行（不同浏览器实例）
+  - phase: 2
+    steps: [tax_invoice]    # 人工断点，暂停
+  - phase: 3
+    steps: [create_record]  # 需 PDF，需确认
+  - phase: 4
+    steps: [archive]        # 归档
+
+# ── 配置引用 ──
+config:
+  wecom_doc_url: "${WECOM_DOC_URL}"  # 由部署环境注入
+  interest_island_url: https://edu-admin.qlchat.com

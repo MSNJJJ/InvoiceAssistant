@@ -1,0 +1,34 @@
+{
+  "run_time": "2026-08-10 10:30:09",
+  "stats": {
+    "total_unread": 1,
+    "invoice_count": 1,
+    "urgent_count": 0,
+    "normal_count": 1,
+    "invalid_count": 0,
+    "uncertain_count": 0,
+    "failed_count": 0
+  },
+  "urgent_orders": [],
+  "normal_orders": [
+    {
+      "order_id_original": "9000000782190489",
+      "order_id_cleaned": "9000000782190489",
+      "amount_raw": "3904元",
+      "amount": null,
+      "note": "加急处理",
+      "title": "广州云课教育",
+      "tax_id": "91440101MA5A1B2",
+      "is_valid": true,
+      "validation_reason": "valid",
+      "quadrant": "normal_valid",
+      "message_subject": "李老师开票申请汇总表",
+      "message_sender": "\" 郭嘉淳 \" <jiachun.guo@qlchat.com>",
+      "message_date": "Mon, 10 Aug 2026 10:27:33 +0800",
+      "message_body": "兴趣岛 郭嘉淳"
+    }
+  ],
+  "invalid_orders": [],
+  "uncertain_entries": [],
+  "failed_entries": []
+}
